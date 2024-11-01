@@ -13,7 +13,7 @@ DEFAULT_PIC_WIDTH = 2560  # 默认是2K分辨率
 PIC_2560_CROP_BOX = tuple([16, 38, 349, 89])  # 2560 x 1440 的图片
 MEDIA_FOLDER = './海马爸比'
 TIME_FOLDER = './时间图片'
-TESSERACT_PATH = r'/opt/homebrew/Cellar/tesseract/5.4.1/bin/tesseract'
+TESSERACT_PATH = r'/opt/homebrew/Cellar/tesseract/5.4.1_2/bin/tesseract'
 TESSERACT_CONFIG = r'-c tessedit_char_whitelist=-0123456789 --psm 6'
 
 easyocr_reader = easyocr.Reader(['en'])
@@ -23,11 +23,6 @@ dddd_ocr_beta = ddddocr.DdddOcr(beta=True)
 # ------------------------------------------------------------------
 ## general functions
 # ------------------------------------------------------------------
-def check_format(file_path):
-    """
-    检查文件类型格式，返回文件后缀类型，大写字母
-    """
-    return str.upper(os.path.splitext(file_path)[1][1:])
 
 def set_media_time(media_path, media_date):
     """
@@ -46,44 +41,33 @@ def set_media_time(media_path, media_date):
             exif_bytes = piexif.dump(exif_dict)
             piexif.insert(exif_bytes, media_path)  # 插入Exif信息
             success = True
-        except:
-            if not (media_path.endswith('.mp4') or media_path.endswith('.MP4')):
-                print(f'  Exif dump 失败: {media_path}')
-    except:
-        if not (media_path.endswith('.mp4') or media_path.endswith('.MP4')):
-            print(f'  Exif load 失败: {media_path}')
+        except Exception as e:
+            if not str.upper(media_path).endswith('.MP4'):
+                print(f'  Exif dump 失败: {media_path} - {e}')
+    except Exception as e:
+        if not str.upper(media_path).endswith('.MP4'):
+            print(f'  Exif load 失败: {media_path} - {e}')
     # 修改文件的修改日期和访问日期
     try:
         mod_time = time.mktime(time.strptime(media_time, '%Y:%m:%d %H:%M:%S'))
         os.utime(media_path, (mod_time, mod_time))
         success = True
-    except:
-        print(f'  修改文件时间失败: {media_path}')
+    except Exception as e:
+        print(f'  修改文件时间失败: {media_path} - {e}')
     return success
 
-def change_pic_name(pic_path, pic_date):
+def change_media_name(media_path, media_date, prefix):
     """
-    修改照片名称
+    修改名称
     """
+    file_ext = os.path.splitext(media_path)[1]
     count = 1
-    new_pic_name = f'IMG_HM_{pic_date}.jpg'
-    while new_pic_name in os.listdir(MEDIA_FOLDER):
-        new_pic_name = f'IMG_HM_{pic_date}_{count}.jpg'
+    new_media_name = prefix + f'{media_date}' + file_ext
+    while new_media_name in os.listdir(MEDIA_FOLDER):
+        new_media_name = prefix +  f'{media_date}_{count}' + file_ext
         count += 1
-    new_pic_path = os.path.join(MEDIA_FOLDER, new_pic_name)
-    os.rename(pic_path, new_pic_path)
-
-def change_video_name(video_path, video_date):
-    """
-    修改视频名称
-    """
-    count = 1
-    new_video_name = f'V_HM_{video_date}.mp4'
-    while new_video_name in os.listdir(MEDIA_FOLDER):
-        new_video_name = f'V_HM_{video_date}_{count}.mp4'
-        count += 1
-    new_video_name = os.path.join(MEDIA_FOLDER, new_video_name)
-    os.rename(video_path, new_video_name)
+    new_media_path = os.path.join(MEDIA_FOLDER, new_media_name)
+    os.rename(media_path, new_media_path)
 
 def crop_pic(pic_path):
     """
@@ -188,7 +172,7 @@ def deal_pics(pic_list):
         if len(pic_date) == 0:
             print('Sorry')
             continue
-        if set_media_time(pic_path, pic_date) : change_pic_name(pic_path, pic_date)
+        if set_media_time(pic_path, pic_date) : change_media_name(pic_path, pic_date, 'IMG_HM_')
         print('Done')
 
 def deal_videos(video_list):
@@ -217,7 +201,7 @@ def deal_videos(video_list):
         if len(video_date) == 0:
             print('Sorry')
             continue
-        if set_media_time(video_path, video_date): change_video_name(video_path, video_date)
+        if set_media_time(video_path, video_date): change_media_name(video_path, video_date, 'V_HM_')
         print('Done')
 
 if __name__ == '__main__':
@@ -234,9 +218,10 @@ if __name__ == '__main__':
     videos = []
     for file in files:
         # 已处理过的不再次处理
-        if check_format(file) in ['JPG', 'JPEG', 'PNG']:
+        file_extension = str.upper(os.path.splitext(file)[1][1:])
+        if file_extension in ['JPG', 'JPEG', 'PNG']:
             if not file.startswith('IMG_HM_'): pics.append(file)
-        if check_format(file) in ['MP4']:
+        if file_extension in ['MP4']:
             if not file.startswith('V_HM_'): videos.append(file)
     # 开始处理
     if len(pics) > 0: deal_pics(pics)
