@@ -42,10 +42,10 @@ def set_media_time(media_path, media_date):
             piexif.insert(exif_bytes, media_path)  # 插入Exif信息
             success = True
         except Exception as e:
-            if not str.upper(media_path).endswith('.MP4'):
+            if str.upper(media_path).endswith('.JPG') or str.upper(media_path).endswith('.JPEG'):
                 print(f'  Exif dump 失败: {media_path} - {e}')
     except Exception as e:
-        if not str.upper(media_path).endswith('.MP4'):
+        if str.upper(media_path).endswith('.JPG') or str.upper(media_path).endswith('.JPEG'):
             print(f'  Exif load 失败: {media_path} - {e}')
     # 修改文件的修改日期和访问日期
     try:
@@ -210,7 +210,7 @@ if __name__ == '__main__':
         print("文件不存在，请在 海马爸比 文件夹中放入拍摄的图片和视频")
         os.mkdir(MEDIA_FOLDER)
         exit()
-    if not os.path.exists(TIME_FOLDER): os.mkdir(TIME_FOLDER)
+    os.makedirs(TIME_FOLDER, exist_ok=True)
     # 先获取指定文件夹下所有的文件
     files = os.listdir(MEDIA_FOLDER)
     # 过滤出所有的图片
