@@ -93,16 +93,19 @@ def upgrade_pic_date(pic_date):
     pic_date = "".join(filter(str.isdigit, pic_date))
     return pic_date
 
+def check_date_valid(pic_date):
+    now_date_str = datetime.datetime.now().strftime('%Y-%m-%d')
+    return datetime.datetime.strptime(now_date_str, "%Y-%m-%d") >= datetime.datetime.strptime(pic_date, '%Y-%m-%d') > datetime.datetime.strptime('2023-09-17', '%Y-%m-%d')
+
 def ocr_haima_pic_to_string(pic_path):
     result_list = []
-    now_date_str = datetime.datetime.now().strftime('%Y-%m-%d')
     # easyocr
     easyocr_result = easyocr_reader.readtext(pic_path, detail=0, allowlist='-0123456789')
     if len(easyocr_result) > 0:
         easy_pic_date = upgrade_pic_date(easyocr_result[0])
         try:
             easy_pic_date = datetime.datetime.strptime(easy_pic_date, "%Y%m%d").strftime('%Y-%m-%d')
-            if datetime.datetime.strptime(now_date_str, "%Y-%m-%d") > datetime.datetime.strptime(easy_pic_date, '%Y-%m-%d') > datetime.datetime.strptime('2023-09-17', '%Y-%m-%d'):
+            if check_date_valid(easy_pic_date):
                 result_list.append(easy_pic_date)
             else:
                 print("easyocr异常时间忽略: ", easy_pic_date)
@@ -114,7 +117,7 @@ def ocr_haima_pic_to_string(pic_path):
     tesseract_pic_date = upgrade_pic_date(tesseract_pic_date)
     try:
         tesseract_pic_date = datetime.datetime.strptime(tesseract_pic_date, "%Y%m%d").strftime('%Y-%m-%d')
-        if datetime.datetime.strptime(now_date_str, "%Y-%m-%d") > datetime.datetime.strptime(tesseract_pic_date, '%Y-%m-%d') > datetime.datetime.strptime('2023-09-17', '%Y-%m-%d'):
+        if check_date_valid(tesseract_pic_date):
             result_list.append(tesseract_pic_date)
         else: print("tesseract异常时间忽略: ", tesseract_pic_date)
     except ValueError:
@@ -125,7 +128,7 @@ def ocr_haima_pic_to_string(pic_path):
     dddd_pic_date = upgrade_pic_date(dddd_ocr.classification(image))
     try:
         dddd_pic_date = datetime.datetime.strptime(dddd_pic_date, "%Y%m%d").strftime('%Y-%m-%d')
-        if datetime.datetime.strptime(now_date_str, "%Y-%m-%d") > datetime.datetime.strptime(dddd_pic_date, '%Y-%m-%d') > datetime.datetime.strptime('2023-09-17', '%Y-%m-%d'):
+        if check_date_valid(dddd_pic_date):
             result_list.append(dddd_pic_date)
         else: print("ddddocr异常时间忽略: ", dddd_pic_date)
     except ValueError:
@@ -135,7 +138,7 @@ def ocr_haima_pic_to_string(pic_path):
     dddd_beta_pic_date = upgrade_pic_date(dddd_ocr_beta.classification(image))
     try:
         dddd_beta_pic_date = datetime.datetime.strptime(dddd_beta_pic_date, "%Y%m%d").strftime('%Y-%m-%d')
-        if datetime.datetime.strptime(now_date_str, "%Y-%m-%d") > datetime.datetime.strptime(dddd_beta_pic_date, '%Y-%m-%d') > datetime.datetime.strptime('2023-09-17', '%Y-%m-%d'):
+        if check_date_valid(dddd_beta_pic_date):
             result_list.append(dddd_beta_pic_date)
         else: print("ddddocr beta异常时间忽略: ", dddd_beta_pic_date)
     except ValueError:
