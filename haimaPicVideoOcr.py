@@ -9,15 +9,17 @@ from PIL import Image
 import cv2
 import ddddocr
 
+# import ssl
+# ssl._create_default_https_context = ssl._create_unverified_context  # 禁用SSL验证[[15]]
+
+# 先使用 homebrew 安装 tesseract
 DEFAULT_PIC_WIDTH = 2560  # 默认是2K分辨率
 PIC_2560_CROP_BOX = tuple([16, 38, 349, 89])  # 2560 x 1440 的图片
 MEDIA_FOLDER = './海马爸比'
 TIME_FOLDER = './时间图片'
-TESSERACT_PATH = r'/opt/homebrew/Cellar/tesseract/5.4.1_2/bin/tesseract'
 TESSERACT_CONFIG = r'-c tessedit_char_whitelist=-0123456789 --psm 6'
 
 easyocr_reader = easyocr.Reader(['en'])
-pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
 dddd_ocr = ddddocr.DdddOcr()
 dddd_ocr_beta = ddddocr.DdddOcr(beta=True)
 # ------------------------------------------------------------------
